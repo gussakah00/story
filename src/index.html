@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cerita di Sekitarmu</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin=""
+    />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1976d2" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Cerita di Sekitarmu" />
+    <meta
+      name="description"
+      content="Aplikasi berbagi cerita berbasis lokasi"
+    />
+
+    <!-- Icons -->
+    <link rel="icon" href="icons/icon-192x192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+
+    <!-- Additional icons for different devices -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="icons/icon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="icons/icon-16x16.png"
+    />
+  </head>
+  <body>
+    <!-- Skip Link for Accessibility -->
+    <a
+      href="#main-content"
+      class="skip-link"
+      aria-label="Lewati ke Konten Utama"
+    >
+      Lewati ke Konten Utama
+    </a>
+
+    <!-- Header -->
+    <header class="main-header">
+      <div class="container">
+        <a
+          class="brand-name"
+          href="#/beranda"
+          aria-label="Cerita di Sekitarmu - Beranda"
+        >
+          Cerita di Sekitarmu
+        </a>
+
+        <nav
+          id="navigation-drawer"
+          class="navigation-drawer"
+          aria-label="Navigasi Utama"
+        >
+          <ul id="nav-list" class="nav-list"></ul>
+        </nav>
+
+        <button
+          id="drawer-button"
+          class="drawer-button"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          aria-controls="navigation-drawer"
+        >
+          <span class="hamburger-icon">☰</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content" class="main-content" tabindex="-1">
+      <div class="loading-state" id="loading-state">
+        <div class="loading-spinner"></div>
+        <h1>Memuat Aplikasi...</h1>
+        <p>Silakan tunggu sebentar.</p>
+      </div>
+    </main>
+
+    <script
+      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+      crossorigin=""
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,2 @@
+APP_URL= https://gussakah00.github.io/notes-app/
+MAP_SERVICE_API_KEY=<api_key>
