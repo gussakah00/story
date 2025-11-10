@@ -30,14 +30,21 @@ class Navigation {
 
   async _initializePushManager() {
     try {
+      // Tunggu sedikit biar SW benar-benar siap
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await pushManager.init();
       this._isPushManagerInitialized = true;
       console.log("Navigation: Push manager initialized successfully");
 
       this._updateNotificationUI();
     } catch (error) {
-      console.error("Navigation: Failed to initialize push manager:", error);
+      console.warn(
+        "Navigation: Push manager init failed (non-critical):",
+        error
+      );
       this._isPushManagerInitialized = false;
+      // Tetap update UI meskipun gagal
+      this._updateNotificationUI();
     }
   }
 
@@ -99,8 +106,7 @@ class Navigation {
 
         if (!this._isPushManagerInitialized) {
           console.log("Push manager not ready, initializing...");
-          await pushManager.init();
-          this._isPushManagerInitialized = true;
+          await this._initializePushManager();
         }
 
         const success = await pushManager.subscribe();
@@ -123,8 +129,7 @@ class Navigation {
 
         if (!this._isPushManagerInitialized) {
           console.log("Push manager not ready, initializing...");
-          await pushManager.init();
-          this._isPushManagerInitialized = true;
+          await this._initializePushManager();
         }
 
         const success = await pushManager.unsubscribe();

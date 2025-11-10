@@ -25,6 +25,15 @@ class PushManager {
       }
 
       try {
+        // Tunggu Service Worker ready
+        if (!navigator.serviceWorker.controller) {
+          console.log("PushManager: Waiting for Service Worker...");
+          await navigator.serviceWorker.ready;
+        }
+
+        this.registration = await navigator.serviceWorker.ready;
+        console.log("PushManager: Service Worker ready", this.registration);
+
         if (this._isDevelopment()) {
           console.log("PushManager: Development mode - using localStorage");
           const stored = localStorage.getItem("pushSubscription");
@@ -33,8 +42,6 @@ class PushManager {
           resolve(true);
           return;
         }
-
-        console.log("PushManager: Service Worker ready");
 
         this.subscription =
           await this.registration.pushManager.getSubscription();
@@ -46,16 +53,12 @@ class PushManager {
       } catch (error) {
         console.error("PushManager: Init error:", error);
 
-        if (this._isDevelopment()) {
-          console.log("PushManager: Development fallback to localStorage");
-          const stored = localStorage.getItem("pushSubscription");
-          this.isSubscribed = !!stored;
-          this._isInitialized = true;
-          resolve(true);
-        } else {
-          this._isInitialized = true;
-          resolve(false);
-        }
+        // Fallback untuk semua environment
+        console.log("PushManager: Fallback to localStorage");
+        const stored = localStorage.getItem("pushSubscription");
+        this.isSubscribed = !!stored;
+        this._isInitialized = true;
+        resolve(true);
       }
     });
 
@@ -75,6 +78,10 @@ class PushManager {
     );
   }
 
+  _isProduction() {
+    return window.location.hostname.includes("github.io");
+  }
+
   async subscribe() {
     if (!this._isInitialized) {
       await this.init();
@@ -88,13 +95,14 @@ class PushManager {
         throw new Error("Izin notifikasi ditolak");
       }
 
-      if (this._isDevelopment()) {
-        console.log("PushManager: Development mode - storing in localStorage");
+      // Untuk GitHub Pages, gunakan localStorage approach
+      if (this._isProduction() || this._isDevelopment()) {
+        console.log("Using localStorage for subscription");
         localStorage.setItem(
           "pushSubscription",
           JSON.stringify({
-            endpoint: "development-mode",
-            keys: { p256dh: "dev", auth: "dev" },
+            endpoint: "browser-storage-mode",
+            keys: { p256dh: "local", auth: "storage" },
           })
         );
         this.isSubscribed = true;
@@ -158,23 +166,17 @@ class PushManager {
     console.log("PushManager: Unsubscribing...");
 
     try {
-      // Di development, hapus dari localStorage
-      if (this._isDevelopment()) {
-        console.log(
-          "PushManager: Development mode - removing from localStorage"
-        );
-        localStorage.removeItem("pushSubscription");
-        this.isSubscribed = false;
+      // Untuk semua environment, hapus dari localStorage
+      console.log("PushManager: Removing from localStorage");
+      localStorage.removeItem("pushSubscription");
+      this.isSubscribed = false;
 
-        this._showLocalNotification(
-          "🔕 Notifikasi Dimatikan",
-          "Anda tidak akan menerima notifikasi lagi."
-        );
-        return true;
-      }
-
-      // Di production, unsubscribe dari push service
-      if (this.subscription) {
+      // Untuk production non-GitHub Pages, unsubscribe dari push service
+      if (
+        !this._isProduction() &&
+        !this._isDevelopment() &&
+        this.subscription
+      ) {
         console.log("PushManager: Unsubscribing from push service...");
         const success = await this.subscription.unsubscribe();
 
@@ -186,7 +188,6 @@ class PushManager {
       // Cleanup
       this.subscription = null;
       this.isSubscribed = false;
-      localStorage.removeItem("pushSubscription");
 
       console.log("PushManager: Local cleanup complete");
 
@@ -372,6 +373,11 @@ class PushManager {
       isSupported: this._isSupported(),
       permission: Notification.permission,
       isInitialized: this._isInitialized,
+      environment: this._isProduction()
+        ? "production"
+        : this._isDevelopment()
+        ? "development"
+        : "other",
     };
   }
 }

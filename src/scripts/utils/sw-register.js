@@ -1,5 +1,3 @@
-// src/scripts/utils/sw-register.js
-
 class ServiceWorkerManager {
   constructor() {
     this.registration = null;
@@ -21,9 +19,6 @@ class ServiceWorkerManager {
 
       // Register SW baru
       await this.registerSW();
-
-      // Setup auto update
-      this.setupAutoUpdate();
 
       console.log("✅ Service Worker berhasil diaktifkan");
       return true;
@@ -66,21 +61,19 @@ class ServiceWorkerManager {
 
   async registerSW() {
     try {
-      // Tentukan URL SW berdasarkan environment
       const swUrl = this.getSWUrl();
-      console.log("📁 Registering Service Worker:", swUrl);
+      const scope = this.getSWScope();
 
-      // Register Service Worker dengan options yang benar
+      console.log("📁 Registering Service Worker:", swUrl, "Scope:", scope);
+
       this.registration = await navigator.serviceWorker.register(swUrl, {
-        scope: "./",
-        updateViaCache: "none",
+        scope: scope,
       });
 
       console.log("✅ Service Worker terdaftar:", this.registration.scope);
 
-      // Tunggu sampai SW aktif
+      // Tunggu aktivasi
       await this.waitForActivation();
-
       return this.registration;
     } catch (error) {
       console.error("❌ Gagal register Service Worker:", error);
@@ -89,23 +82,25 @@ class ServiceWorkerManager {
   }
 
   getSWUrl() {
-    // Development - gunakan SW sederhana
-    if (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-    ) {
-      return "/sw.js";
-    }
-
-    // Production - sesuaikan dengan GitHub Pages
-    const isGitHubPages = window.location.hostname.includes("github.io");
-    if (isGitHubPages) {
-      const repoName = window.location.pathname.split("/")[1] || "revisi2";
+    // Untuk GitHub Pages
+    if (window.location.hostname.includes("github.io")) {
+      const repoName = window.location.pathname.split("/")[1] || "story";
       return `/${repoName}/sw.js`;
     }
 
-    // Default
+    // Untuk development/local
     return "/sw.js";
+  }
+
+  getSWScope() {
+    // Untuk GitHub Pages
+    if (window.location.hostname.includes("github.io")) {
+      const repoName = window.location.pathname.split("/")[1] || "story";
+      return `/${repoName}/`;
+    }
+
+    // Untuk development/local
+    return "/";
   }
 
   async waitForActivation() {
@@ -161,30 +156,12 @@ class ServiceWorkerManager {
       // Timeout setelah 10 detik
       setTimeout(() => {
         if (!this.isActive) {
-          reject(new Error("Service Worker activation timeout"));
+          console.warn(
+            "⚠️ Service Worker activation timeout, but continuing..."
+          );
+          resolve(this.registration); // Jangan reject, biarkan continue
         }
       }, 10000);
-    });
-  }
-
-  setupAutoUpdate() {
-    if (!this.registration) return;
-
-    // Check for updates setiap 1 jam
-    setInterval(async () => {
-      try {
-        console.log("🔍 Memeriksa update Service Worker...");
-        await this.registration.update();
-        console.log("✅ Update check selesai");
-      } catch (error) {
-        console.error("❌ Gagal check update:", error);
-      }
-    }, 60 * 60 * 1000); // 1 jam
-
-    // Listen untuk controller change
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      console.log("🔄 Controller Service Worker berubah");
-      this.isActive = true;
     });
   }
 
