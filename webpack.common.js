@@ -15,6 +15,9 @@ module.exports = {
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: "asset/resource",
+        generator: {
+          filename: "icons/[name][ext]",
+        },
       },
     ],
   },
@@ -40,6 +43,10 @@ module.exports = {
         {
           from: "./sw.js",
           to: ".",
+        },
+        {
+          from: "./src/public/icons",
+          to: "icons",
         },
       ],
     }),
